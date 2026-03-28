@@ -24,7 +24,7 @@ variable "ecr_repository_type" {
 # Create Lifecycle policy (true or false)
 variable "ecr_create_lifecycle_policy" {
   description = "Determines whether a lifecycle policy will be created"
-  type        = boolean
+  type        = bool
   default     = false
 }
 

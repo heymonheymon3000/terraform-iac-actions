@@ -102,5 +102,5 @@ output "node_group_private_version" {
 # Kubectl Configuration
 output "configure_kubectl" {
   description = "Configure kubectl: make sure you're logged in with the correct AWS profile and run the following command to update your kubeconfig"
-  value       = "aws eks update-kubeconfig --name ${output.cluster_id} --region ${var.aws_region}"
+  value       = "aws eks update-kubeconfig --name ${aws_eks_cluster.eks_cluster.id} --region ${var.aws_region}"
 }

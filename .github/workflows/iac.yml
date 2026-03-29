@@ -10,11 +10,16 @@ on:
       - terraform/**
   workflow_dispatch: # Enables manual trigger for destroy job
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
 # Environment Variables
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   S3_BUCKET: ${{ secrets.S3_BUCKET }}
+  ROLE_GITHUB_ACTION: ${{ secrets.ROLE_GITHUB_ACTION }}
   AWS_REGION: ${{ vars.AWS_REGION }}
   EKS_CLUSTER: ${{ vars.EKS_CLUSTER }}
   ECR_REPO: ${{ vars.ECR_REPO }}
@@ -63,9 +68,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.ROLE_GITHUB_ACTION }}
 
       - name: Get Kubernetes config
         id: getconfig
@@ -101,9 +105,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.ROLE_GITHUB_ACTION }}
 
       - name: Get Kubernetes config
         id: getconfig

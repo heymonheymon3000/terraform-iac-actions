@@ -108,7 +108,32 @@ jobs:
       #   id: getconfig
       #   run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
 
+      - name: Get Kubernetes config
+        id: getconfig
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${{ env.EKS_CLUSTER }}" || -z "${{ env.AWS_REGION }}" ]]; then
+            echo "EKS_CLUSTER or AWS_REGION missing; skipping kubeconfig update."
+            exit 1
+          fi
+
+          if ! command -v aws >/dev/null 2>&1; then
+            echo "aws CLI not installed; cannot update kubeconfig."
+            exit 1
+          fi
+
+          echo "Validating EKS cluster exists..."
+          if ! aws eks describe-cluster --name "${{ env.EKS_CLUSTER }}" --region "${{ env.AWS_REGION }}" >/dev/null 2>&1; then
+            echo "EKS cluster '${{ env.EKS_CLUSTER }}' not accessible in '${{ env.AWS_REGION }}'; skipping kubeconfig update."
+            exit 1
+          fi
+
+          echo "Cluster validated; updating kubeconfig..."
+          aws eks update-kubeconfig --name "${{ env.EKS_CLUSTER }}" --region "${{ env.AWS_REGION }}"
+
       - name: Delete Ingress controller
+        id: delete_ingress
         run: |
           if kubectl get namespace ingress-nginx >/dev/null 2>&1; then
             echo "Ingress namespace exists, deleting controller"
@@ -117,16 +142,18 @@ jobs:
             echo "Ingress controller not present, skipping delete"
           fi
 
-      # - name: Empty ECR Repository
-      #   run: |
-      #     REPOSITORY_NAME=${{ vars.ecr_repo }}
-      #     IMAGES=$(aws ecr list-images --repository-name $REPOSITORY_NAME --query 'imageIds[*]' --output json)
-      #     if [[ "$IMAGES" != "[]" ]]; then
-      #       echo "Deleting images from $REPOSITORY_NAME..."
-      #       aws ecr batch-delete-image --repository-name $REPOSITORY_NAME --image-ids "$IMAGES"
-      #     else
-      #       echo "No images found in $REPOSITORY_NAME."
-      #     fi
+      - name: Empty ECR Repository
+        id: ecr_cleanup
+        if: ${{ vars.ecr_repo != '' && vars.ecr_repo != null }}
+        run: |
+          REPOSITORY_NAME=${{ vars.ecr_repo }}
+          IMAGES=$(aws ecr list-images --repository-name $REPOSITORY_NAME --query 'imageIds[*]' --output json)
+          if [[ "$IMAGES" != "[]" ]]; then
+            echo "Deleting images from $REPOSITORY_NAME..."
+            aws ecr batch-delete-image --repository-name $REPOSITORY_NAME --image-ids "$IMAGES"
+          else
+            echo "No images found in $REPOSITORY_NAME."
+          fi
 
       - name: Terraform destroy
         id: destroy

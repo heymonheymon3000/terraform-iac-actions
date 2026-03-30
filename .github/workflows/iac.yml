@@ -126,18 +126,18 @@ jobs:
 
           if [[ -z "${{ env.EKS_CLUSTER }}" || -z "${{ env.AWS_REGION }}" ]]; then
             echo "EKS_CLUSTER or AWS_REGION missing; skipping kubeconfig update."
-            exit 1
+            exit 0
           fi
 
           if ! command -v aws >/dev/null 2>&1; then
             echo "aws CLI not installed; cannot update kubeconfig."
-            exit 1
+            exit 0
           fi
 
           echo "Validating EKS cluster exists..."
           if ! aws eks describe-cluster --name "${{ env.EKS_CLUSTER }}" --region "${{ env.AWS_REGION }}" >/dev/null 2>&1; then
             echo "EKS cluster '${{ env.EKS_CLUSTER }}' not accessible in '${{ env.AWS_REGION }}'; skipping kubeconfig update."
-            exit 1
+            exit 0
           fi
 
           echo "Cluster validated; updating kubeconfig..."

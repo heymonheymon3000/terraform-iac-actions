@@ -14,11 +14,11 @@ resource "aws_iam_role" "irsa_iam_role" {
         Effect = "Allow"
         Sid    = ""
         Principal = {
-          Federated = "${aws_iam_openid_connect_provider_arn}"
+          Federated = "${output.aws_iam_openid_connect_provider_arn}"
         }
         Condition = {
           StringEquals = {
-            "${aws_iam_openid_connect_provider_extract_from_arn}:sub": "system:serviceaccount:default:irsa-demo-sa"
+            "${output.aws_iam_openid_connect_provider_extract_from_arn}:sub": "system:serviceaccount:default:irsa-demo-sa"
           }
         }
       },

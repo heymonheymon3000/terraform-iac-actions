@@ -68,15 +68,15 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          # role-to-assume: ${{ env.ROLE_GITHUB_ACTION }}
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ env.ROLE_GITHUB_ACTION }}
+          # aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          # aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # - name: Additional steps
-      #   run: |
-      #     # Your commands that require AWS credentials
-      #     aws sts get-caller-identity
+      - name: Additional steps
+        run: |
+          # Your commands that require AWS credentials
+          aws sts get-caller-identity
 
       - name: Get Kubernetes config
         id: getconfig
@@ -116,15 +116,15 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          # role-to-assume: ${{ env.ROLE_GITHUB_ACTION }}
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ env.ROLE_GITHUB_ACTION }}
+          # aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          # aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # - name: Additional steps
-      #   run: |
-      #     # Your commands that require AWS credentials
-      #     aws sts get-caller-identity
+      - name: Additional steps
+        run: |
+          # Your commands that require AWS credentials
+          aws sts get-caller-identity
 
       - name: Get Kubernetes config
         id: getconfig

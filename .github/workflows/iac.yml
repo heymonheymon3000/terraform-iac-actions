@@ -10,16 +10,11 @@ on:
       - terraform/**
   workflow_dispatch: # Enables manual trigger for destroy job
 
-permissions:
-  id-token: write # Required for OIDC
-  contents: read
-
 # Environment Variables
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   S3_BUCKET: ${{ secrets.S3_BUCKET }}
-  ROLE_GITHUB_ACTION: ${{ secrets.ROLE_GITHUB_ACTION }}
   AWS_REGION: ${{ vars.AWS_REGION }}
   EKS_CLUSTER: ${{ vars.EKS_CLUSTER }}
   ECR_REPO: ${{ vars.ECR_REPO }}
@@ -68,26 +63,16 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ env.ROLE_GITHUB_ACTION }}
-          # aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          # aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Additional steps
-        run: |
-          # Your commands that require AWS credentials
-          aws sts get-caller-identity
-
-      - name: Get irsa_iam_role_arn output and set env var
-        run: echo "IRSA_ROLE_ARN=$(terraform output -raw irsa_iam_role_arn)" >> $GITHUB_ENV
 
       - name: Get Kubernetes config
         id: getconfig
         if: steps.apply.outcome == 'success'
         run: |
           set -euo pipefail
-          # aws eks update-kubeconfig --name "${{ env.EKS_CLUSTER }}" --region "${{ env.AWS_REGION }}"
-          aws eks update-kubeconfig --name "${{ env.EKS_CLUSTER }}" --region "${{ env.AWS_REGION }}" --role-arn $IRSA_ROLE_ARN
+          aws eks update-kubeconfig --name "${{ env.EKS_CLUSTER }}" --region "${{ env.AWS_REGION }}"
           kubectl config current-context
           kubectl get namespace kube-system
 
@@ -120,18 +105,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ env.ROLE_GITHUB_ACTION }}
-          # aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          # aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Additional steps
-        run: |
-          # Your commands that require AWS credentials
-          aws sts get-caller-identity
-
-      - name: Get irsa_iam_role_arn output and set env var
-        run: echo "IRSA_ROLE_ARN=$(terraform output -raw irsa_iam_role_arn)" >> $GITHUB_ENV
 
       - name: Get Kubernetes config
         id: getconfig
@@ -157,7 +133,6 @@ jobs:
 
           echo "Cluster validated; updating kubeconfig..."
           aws eks update-kubeconfig --name "${{ env.EKS_CLUSTER }}" --region "${{ env.AWS_REGION }}"
-          # aws eks update-kubeconfig --name "${{ env.EKS_CLUSTER }}" --region "${{ env.AWS_REGION }}" --role-arn $IRSA_ROLE_ARN
 
       - name: Delete Ingress controller
         id: delete_ingress

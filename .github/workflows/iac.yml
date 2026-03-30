@@ -83,7 +83,7 @@ jobs:
         if: steps.apply.outcome == 'success'
         run: |
           set -euo pipefail
-          aws eks update-kubeconfig --name "${{ env.EKS_CLUSTER }}" --region "${{ env.AWS_REGION }}"
+          aws eks update-kubeconfig --name "${{ env.EKS_CLUSTER }}" --region "${{ env.AWS_REGION }}" --role-arn "${{ env.ROLE_GITHUB_ACTION }}"
           kubectl config current-context
           kubectl get namespace kube-system
 
